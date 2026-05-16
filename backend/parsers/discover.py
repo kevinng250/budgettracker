@@ -19,8 +19,16 @@ class DiscoverParser(BaseParser):
                 continue
             raw_date = row["Post Date"].strip()
             date = datetime.strptime(raw_date, "%m/%d/%Y").strftime("%Y-%m-%d")
+            # Discover CSVs sometimes use "Trans. Date", sometimes "Transaction Date".
+            txn_raw = (row.get("Trans. Date") or row.get("Transaction Date") or "").strip()
+            transaction_date = (
+                datetime.strptime(txn_raw, "%m/%d/%Y").strftime("%Y-%m-%d")
+                if txn_raw
+                else None
+            )
             transactions.append({
                 "date": date,
+                "transaction_date": transaction_date,
                 "description": description,
                 "amount": amount,
                 "bank": self.bank,

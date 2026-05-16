@@ -8,6 +8,9 @@ export interface Filters {
   bank?: string;
   account?: string;
   tag?: string;
+  category?: string;
+  label_id?: number;
+  profile_id?: number;
   search?: string;
   sort_by?: string;
   sort_dir?: string;

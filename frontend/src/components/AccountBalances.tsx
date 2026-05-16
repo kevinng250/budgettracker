@@ -15,6 +15,7 @@ import {
 import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import api from "../api/client";
+import { useActiveProfile } from "../context/ActiveProfile";
 import type { AccountBalance, ManualAccount } from "../types";
 
 export default function AccountBalances() {
@@ -24,11 +25,14 @@ export default function AccountBalances() {
   const [formBank, setFormBank] = useState("");
   const [formAccount, setFormAccount] = useState("");
   const [formBalance, setFormBalance] = useState<number | string>(0);
+  const { activeProfileId } = useActiveProfile();
 
   const fetchBalances = useCallback(async () => {
-    const res = await api.get("/account-balances");
+    const params: Record<string, string> = {};
+    if (activeProfileId != null) params.profile_id = String(activeProfileId);
+    const res = await api.get("/account-balances", { params });
     setBalances(res.data);
-  }, []);
+  }, [activeProfileId]);
 
   useEffect(() => {
     fetchBalances();
@@ -71,10 +75,19 @@ export default function AccountBalances() {
           balance: Number(formBalance),
         });
       } else {
+        if (activeProfileId == null) {
+          notifications.show({
+            title: "Pick a profile",
+            message: "Switch from Combined to a specific profile before adding an account.",
+            color: "yellow",
+          });
+          return;
+        }
         await api.post("/manual-accounts", {
           bank,
           account,
           balance: Number(formBalance),
+          profile_id: activeProfileId,
         });
       }
       setModalOpen(false);

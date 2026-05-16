@@ -26,39 +26,98 @@ interface Props {
   month: Date;
   onPrev: () => void;
   onNext: () => void;
+  periodLabel?: string;
+  hideNav?: boolean;
+  showDailyAvg?: boolean;
+  groupBy?: string;
+  onGroupByChange?: (v: string) => void;
 }
 
-export default function SpendingByTag({ data, month, onPrev, onNext }: Props) {
+export default function SpendingByTag({ data, month, onPrev, onNext, periodLabel, hideNav, showDailyAvg, groupBy, onGroupByChange }: Props) {
   const [view, setView] = useState("table");
-  const label = `${MONTH_NAMES[month.getMonth()]} ${month.getFullYear()}`;
+  const label = periodLabel || `${MONTH_NAMES[month.getMonth()]} ${month.getFullYear()}`;
   const grandTotal = data.reduce((sum, d) => sum + d.total, 0);
+  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
 
   return (
     <Paper p="md" withBorder>
-      <Group justify="space-between" mb="sm">
-        <ActionIcon variant="subtle" onClick={onPrev}>
-          <IconChevronLeft size={18} />
-        </ActionIcon>
+      <Group justify={hideNav ? "center" : "space-between"} mb="sm">
+        {!hideNav && (
+          <ActionIcon variant="subtle" onClick={onPrev}>
+            <IconChevronLeft size={18} />
+          </ActionIcon>
+        )}
         <Title order={4}>{label}</Title>
-        <ActionIcon variant="subtle" onClick={onNext}>
-          <IconChevronRight size={18} />
-        </ActionIcon>
+        {!hideNav && (
+          <ActionIcon variant="subtle" onClick={onNext}>
+            <IconChevronRight size={18} />
+          </ActionIcon>
+        )}
       </Group>
 
-      <Group justify="center" mb="sm">
+      <Group justify="center" mb="sm" gap="sm">
         <SegmentedControl
           value={view}
           onChange={setView}
           data={[
             { label: "Chart", value: "chart" },
             { label: "Table", value: "table" },
+            ...(showDailyAvg ? [{ label: "Daily Avg", value: "daily" }] : []),
           ]}
           size="xs"
         />
+        {onGroupByChange && (
+          <SegmentedControl
+            value={groupBy ?? "tag"}
+            onChange={onGroupByChange}
+            data={[
+              { label: "Tag", value: "tag" },
+              { label: "Category", value: "category" },
+            ]}
+            size="xs"
+          />
+        )}
       </Group>
 
       {data.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">No spending data this month</Text>
+      ) : view === "daily" ? (
+        <>
+          <Text size="sm" c="dimmed" ta="center" mb="xs">
+            Based on {daysInMonth} days in {MONTH_NAMES[month.getMonth()]}
+          </Text>
+          <Table striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Category</Table.Th>
+                <Table.Th style={{ textAlign: "right" }}>Total</Table.Th>
+                <Table.Th style={{ textAlign: "right" }}>Per Day</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {data.map((row) => (
+                <Table.Tr key={row.tag}>
+                  <Table.Td>{row.tag}</Table.Td>
+                  <Table.Td style={{ textAlign: "right" }}>
+                    <Text fw={500}>${row.total.toFixed(2)}</Text>
+                  </Table.Td>
+                  <Table.Td style={{ textAlign: "right" }}>
+                    <Text fw={500}>${(row.total / daysInMonth).toFixed(2)}</Text>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+              <Table.Tr>
+                <Table.Td><Text fw={700}>Total</Text></Table.Td>
+                <Table.Td style={{ textAlign: "right" }}>
+                  <Text fw={700}>${grandTotal.toFixed(2)}</Text>
+                </Table.Td>
+                <Table.Td style={{ textAlign: "right" }}>
+                  <Text fw={700}>${(grandTotal / daysInMonth).toFixed(2)}</Text>
+                </Table.Td>
+              </Table.Tr>
+            </Table.Tbody>
+          </Table>
+        </>
       ) : view === "chart" ? (
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>

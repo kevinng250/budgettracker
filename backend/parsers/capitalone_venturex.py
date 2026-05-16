@@ -17,8 +17,10 @@ class CapitalOneVentureXParser(BaseParser):
             description = row["Description"].strip()
             if not description:
                 continue
+            txn_raw = (row.get("Transaction Date") or "").strip() or None
             transactions.append({
                 "date": row["Posted Date"].strip(),  # Already YYYY-MM-DD
+                "transaction_date": txn_raw,  # Already YYYY-MM-DD when present
                 "description": description,
                 "amount": amount,
                 "bank": self.bank,

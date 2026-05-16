@@ -1,4 +1,5 @@
 backend/data/budget.db
+backend/data/uploads/
 backend/__pycache__/
 backend/**/__pycache__/
 frontend/node_modules/
@@ -6,3 +7,8 @@ frontend/dist/
 budget
 .DS_Store
 *.pyc
+
+# Secrets / local config
+.env
+.env.local
+*.env

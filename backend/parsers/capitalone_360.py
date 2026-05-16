@@ -27,6 +27,8 @@ class CapitalOne360Parser(BaseParser):
             balance = float(balance_str) if balance_str else None
             transactions.append({
                 "date": date,
+                # Checking accounts don't expose a separate posted/transaction date.
+                "transaction_date": None,
                 "description": description,
                 "amount": amount,
                 "bank": self.bank,

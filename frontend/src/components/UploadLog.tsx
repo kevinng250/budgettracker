@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { Paper, Title, Table, Badge, Text, Group, Select } from "@mantine/core";
+import { Paper, Title, Table, Badge, Text, Group, Select, ActionIcon } from "@mantine/core";
+import { IconTrash } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 import api from "../api/client";
 import type { UploadLogEntry, BankAccount } from "../types";
 
 interface Props {
   bankAccounts: BankAccount[];
   refreshKey: number;
+  onDeleted?: () => void;
 }
 
-export default function UploadLog({ bankAccounts, refreshKey }: Props) {
+export default function UploadLog({ bankAccounts, refreshKey, onDeleted }: Props) {
   const [logs, setLogs] = useState<UploadLogEntry[]>([]);
   const [filter, setFilter] = useState("");
 
@@ -42,6 +45,23 @@ export default function UploadLog({ bankAccounts, refreshKey }: Props) {
     })),
   ];
 
+  const handleDelete = async (log: UploadLogEntry) => {
+    if (!window.confirm(
+      `Delete this upload? It will remove ${log.inserted} transaction${log.inserted === 1 ? "" : "s"} ` +
+      `from ${log.bank} - ${log.account} between ${log.date_min} and ${log.date_max}.`
+    )) return;
+    try {
+      await api.delete(`/upload-log/${log.id}`);
+      onDeleted?.();
+    } catch (err: any) {
+      notifications.show({
+        title: "Error",
+        message: err.response?.data?.error || "Failed to delete upload",
+        color: "red",
+      });
+    }
+  };
+
   return (
     <Paper p="md" withBorder>
       <Group justify="space-between" mb="sm">
@@ -72,6 +92,7 @@ export default function UploadLog({ bankAccounts, refreshKey }: Props) {
           No uploads yet
         </Text>
       ) : (
+        <Table.ScrollContainer minWidth={720}>
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -81,6 +102,7 @@ export default function UploadLog({ bankAccounts, refreshKey }: Props) {
               <Table.Th>Date Range</Table.Th>
               <Table.Th>Transactions</Table.Th>
               <Table.Th>Uploaded At</Table.Th>
+              <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -106,10 +128,23 @@ export default function UploadLog({ bankAccounts, refreshKey }: Props) {
                 <Table.Td>
                   <Text size="sm" c="dimmed">{log.uploaded_at}</Text>
                 </Table.Td>
+                <Table.Td>
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    onClick={() => handleDelete(log)}
+                    aria-label="Delete upload batch"
+                    title="Delete this upload's transactions"
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
       )}
     </Paper>
   );

@@ -49,15 +49,26 @@ export default function TagDropdown({
     onUpdated();
   };
 
+  const categoryTags = tags.filter((t) => t.is_category).map((t) => t.name);
+  const regularTags = tags.filter((t) => !t.is_category).map((t) => t.name);
+  const groupedData =
+    categoryTags.length > 0
+      ? [
+          { group: "Categories", items: categoryTags },
+          { group: "Tags", items: regularTags },
+        ]
+      : regularTags;
+
   return (
     <>
       <Select
         value={currentTag}
         onChange={handleChange}
-        data={tags.map((t) => t.name)}
+        data={groupedData}
         size="xs"
-        w={140}
+        w={160}
         allowDeselect={false}
+        searchable
       />
       <Modal
         opened={modalOpen}

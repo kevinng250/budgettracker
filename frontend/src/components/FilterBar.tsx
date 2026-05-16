@@ -1,20 +1,23 @@
 import { Group, TextInput, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { IconSearch } from "@tabler/icons-react";
-import type { Tag, BankAccount } from "../types";
+import type { Tag, BankAccount, Category } from "../types";
 
 interface Props {
   dateFrom: Date | null;
   dateTo: Date | null;
   bank: string;
   tag: string;
+  category: string;
   search: string;
   tags: Tag[];
+  categories: Category[];
   bankAccounts: BankAccount[];
   onDateFromChange: (d: Date | null) => void;
   onDateToChange: (d: Date | null) => void;
   onBankChange: (v: string) => void;
   onTagChange: (v: string) => void;
+  onCategoryChange: (v: string) => void;
   onSearchChange: (v: string) => void;
 }
 
@@ -30,6 +33,12 @@ export default function FilterBar(props: Props) {
   const tagOptions = [
     { value: "", label: "All Tags" },
     ...props.tags.map((t) => ({ value: t.name, label: t.name })),
+  ];
+
+  const categoryOptions = [
+    { value: "", label: "All Categories" },
+    ...props.categories.map((c) => ({ value: c.name, label: c.name })),
+    { value: "Uncategorized", label: "Uncategorized" },
   ];
 
   return (
@@ -57,6 +66,15 @@ export default function FilterBar(props: Props) {
         data={bankOptions}
         size="sm"
         w={200}
+        allowDeselect={false}
+      />
+      <Select
+        placeholder="Category"
+        value={props.category}
+        onChange={(v) => props.onCategoryChange(v || "")}
+        data={categoryOptions}
+        size="sm"
+        w={180}
         allowDeselect={false}
       />
       <Select
