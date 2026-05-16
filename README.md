@@ -13,6 +13,16 @@ A personal/household budget tracker that ingests bank CSVs, scans grocery receip
 - **Profiles** segregate household members' data. Switch profiles to see one person's spending; switch to **Combined** to see household totals.
 - **Dashboard** with income vs. spending, by-tag/by-category breakdowns, account balance trends, and daily-average panels.
 
+## Screenshots
+
+| Dashboard | Transactions | Tags & Categories |
+|---|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Transactions](docs/screenshots/transactions.png) | ![Tags and Categories](docs/screenshots/tags-and-categories.png) |
+
+- **Dashboard** — income vs. spending with a range selector, by-tag/by-category breakdowns, period/mode KPIs, account balance trends.
+- **Transactions** — uploads land here. Filter by date, bank, tag, category, label. Posted and transaction date side by side. Inline tag picker, splits, multi-select for bulk label assignment.
+- **Tags & Categories** — household taxonomy as a card grid. Click a chip to edit, drag-free reordering via the `+` FAB for new categories or tags.
+
 ## Stack
 
 - **Backend**: Python 3.9+ / Flask, raw `sqlite3` (no ORM)
